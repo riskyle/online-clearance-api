@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreStudentRequest;
+use App\Http\Resources\V1\StudentResource;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
@@ -18,24 +20,30 @@ class RegisteredUserController extends Controller
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function store(Request $request): Response
+    public function store(StoreStudentRequest $request) //: Response
     {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-        ]);
+        $roleId = 3;
 
         $user = User::create([
-            'name' => $request->name,
+            'role_id' => $roleId,
             'email' => $request->email,
             'password' => Hash::make($request->string('password')),
         ]);
 
-        event(new Registered($user));
+        return new StudentResource($user->student()->create([
+            'lrn' => $request->lrn,
+            'student_firstname' => $request->studentFirstname,
+            'student_middlename' => $request->studentMiddlename,
+            'student_lastname' => $request->studentLastname,
+            'student_section' => $request->studentSection,
+            'student_year_level' => $request->studentYearLevel,
+            'student_type' => $request->studentType,
+        ]));
 
-        Auth::login($user);
+        // event(new Registered($user));
 
-        return response()->noContent();
+        // Auth::login($user);
+
+        // return response()->noContent();
     }
 }
