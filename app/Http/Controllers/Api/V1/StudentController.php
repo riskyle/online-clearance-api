@@ -5,25 +5,26 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreStudentRequest;
 use App\Http\Requests\UpdateStudentRequest;
-use App\Http\Resources\V1\StudentCollection;
 use App\Models\User;
-use App\Http\Resources\V1\StudentResource;
-use App\Models\Student;
+use App\Http\Resources\V1\UserCollection;
+use App\Http\Resources\V1\UserResource;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Http\Request;
 
 class StudentController extends Controller
 {
     private int $roleId = 3;
 
-    public function index(Student $student)
+    public function index(User $user, Request $request)
     {
-        return new StudentCollection($student->with('user')->get());
+        Gate::authorize('viewAny', $user);
+
+        return new UserCollection($user->getStudentUsers($request->query('includeClearances'))->paginate(3));
     }
 
-    public function store(StoreStudentRequest $request)
+    public function store(StoreStudentRequest $request, User $user)
     {
         $user = User::create([
             'role_id' => $this->roleId,
@@ -31,52 +32,62 @@ class StudentController extends Controller
             'password' => Hash::make($request->string('password')),
         ]);
 
-        return new StudentResource($user->student()->create([
-            'student_firstname' => $request->studentFirstname,
-            'student_middlename' => $request->studentMiddlename ?? null,
-            'student_lastname' => $request->studentLastname,
-            'student_mobile_number' => $request->studentMobileNumber,
-            'student_section' => $request->studentSection,
-            'student_year_level' => $request->studentYearLevel,
-            'student_type' => $request->studentType,
-            'lrn' => $request->lrn,
-        ]));
+        $filteredArray = Arr::except($request->all(), [...$this->excluded(), 'email', 'password']);
+
+        $user->student()->create($filteredArray);
+
+        return new UserResource($user->findStudentUser($user->id));
     }
 
-    public function show(Student $student)
+    public function show(User $user, Request $request)
     {
-        return new StudentResource($student);
+        Gate::authorize('view', $user);
+
+        return new UserResource($user->findStudentUser($user->id, $request->query('includeClearances')));
     }
 
-    public function update(Student $student, UpdateStudentRequest $request)
+    public function update(User $user, UpdateStudentRequest $request)
     {
-
         $filteredArray = Arr::except($request->all(), $this->excluded());
 
-        $student->update($filteredArray);
+        if (!$filteredArray) {
+            throw new \ErrorException("Pointless!");
+        }
+
+        if (array_key_exists('email', $filteredArray)) {
+            $user->update([
+                'email' => $filteredArray['email'],
+            ]);
+        }
+
+        $filteredArray = Arr::except($filteredArray, ['email']);
+
+        if ($filteredArray) {
+
+            $user = $user->findStudentUser($user->id);
+
+            $user->student->update($filteredArray);
+        }
 
         return response()->json(['message' => 'Student Information updated!']);
     }
 
-    public function updateProfilePicture(User $user, Request $request)
+    public function destroy(User $user)
     {
+        Gate::authorize('delete', $user);
 
-        $request->validate([
-            'profilePicture' => ['required', 'sometimes', 'image']
-        ]);
+        $user->delete();
 
-        $picture = Storage::disk('public')->put('/profile_pictures', $request->file('profilePicture'));
-
-        $user->update(['profile_picture' => $picture]);
-
-        return response()->json(['message' => 'Profile Picture has been updated!']);
+        return response()->json(['message' => 'Students data has been deleted']);
     }
 
     public function excluded(): array
     {
         return [
+            'password_confirmation',
+            'passwordConfirmation',
             'studentFirstname',
-            'studentMiddleName',
+            'studentMiddlename',
             'studentLastname',
             'studentMobileNumber',
             'studentYearLevel',

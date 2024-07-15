@@ -15,7 +15,10 @@ class UpdateStudentRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+
+        $user = auth()->user();
+
+        return auth()->check() && $user->role_id === 1; //only super admin have authorize to update informations 
     }
 
     /**
@@ -26,11 +29,13 @@ class UpdateStudentRequest extends FormRequest
     public function rules(): array
     {
         $method = $this->method();
+
         if ($method === "PUT") {
+
             return  [
                 'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
                 'password' => ['required', 'confirmed', Rules\Password::defaults()],
-                'lrn' => ['required', 'numeric', 'unique:' . Student::class],
+                'lrn' => ['required', 'numeric', 'min_digits:12', 'max_digits:12', 'unique:' . Student::class],
                 'studentFirstname' => ['required', 'string'],
                 'studentMiddleName' => ['sometimes', 'required', 'string'],
                 'studentLastname' => ['required', 'string'],
@@ -53,11 +58,11 @@ class UpdateStudentRequest extends FormRequest
             return [
                 'email' => ['sometimes', 'required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
                 'password' => ['sometimes', 'required', 'confirmed', Rules\Password::defaults()],
-                'lrn' => ['sometimes', 'required', 'numeric', 'unique:' . Student::class],
+                'lrn' => ['sometimes', 'required', 'numeric', 'min_digits:12', 'max_digits:12', 'unique:' . Student::class],
                 'studentFirstname' => ['sometimes', 'required', 'string'],
-                'studentMiddleName' => ['sometimes', 'required', 'string'],
+                'studentMiddlename' => ['sometimes', 'required', 'string'],
                 'studentLastname' => ['sometimes', 'required', 'string'],
-                'studentMobileNumber' => ['sometimes', 'sometimes', 'string', 'min:11', 'max:11', 'unique:students,student_mobile_number'],
+                'studentMobileNumber' => ['sometimes', 'required', 'string', 'min:11', 'max:11', 'unique:students,student_mobile_number'],
                 'studentYearLevel' => ['sometimes', 'required', 'numeric'],
                 'studentSection' => ['sometimes', 'required', 'string'],
                 'studentAddress' => ['sometimes', 'required', 'string'],
@@ -76,15 +81,19 @@ class UpdateStudentRequest extends FormRequest
 
     public function prepareForValidation()
     {
-        $varibles = $this->variables();
+        $variables = $this->variables();
+
+        $attr = [];
 
         foreach ($this->request as $vKey => $data) {
 
-            if (array_key_exists($vKey, $varibles)) {
+            if (array_key_exists($vKey, $variables)) {
 
-                $this->merge([$varibles[$vKey] => $this->$vKey]);
+                $attr[$variables[$vKey]] = $this->$vKey;
             }
         }
+
+        $this->merge($attr);
     }
 
     protected function variables(): array
@@ -92,7 +101,7 @@ class UpdateStudentRequest extends FormRequest
         return [
             'passwordConfirmation' => 'password_confirmation',
             'studentFirstname' => 'student_firstname',
-            'studentMiddleName' => 'student_middlename',
+            'studentMiddlename' => 'student_middlename',
             'studentLastname' => 'student_lastname',
             'studentMobileNumber' => 'student_mobile_number',
             'studentYearLevel' => 'student_year_level',

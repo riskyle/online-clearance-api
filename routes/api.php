@@ -2,38 +2,25 @@
 
 use App\Http\Controllers\Api\V1\SchoolPersonnelController;
 use App\Http\Controllers\Api\V1\StudentController;
-use App\Http\Resources\V1\SchoolPersonnelResource;
-use App\Http\Resources\V1\StudentResource;
-use App\Models\SchoolPersonnel;
-use App\Models\Student;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\V1\ClearanceController;
+use App\Http\Controllers\Api\V1\ProfileController;
+use App\Http\Resources\V1\UserResource;
+use Illuminate\Http\Request;
 
-Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
+Route::middleware(['auth:sanctum'])->get('/user', fn (Request $request) =>  new UserResource($request->user()));
 
-    if (auth()->user()->role_id != 3) {
+Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
 
-        $sp = new SchoolPersonnel;
+    Route::apiResource('profiles', ProfileController::class);
 
-        $user = new SchoolPersonnelResource($sp->with('user')->where('user_id', auth()->user()->id)->first());
+    Route::apiResource('students', StudentController::class)->parameter('students', 'user');
 
-        return $user;
-    }
+    Route::apiResource('school-personnels', SchoolPersonnelController::class)->parameter('school-personnels', 'user');
 
-    $student = new Student;
+    Route::apiResource('clearances', ClearanceController::class)->except('store');
 
-    $user = new StudentResource($student->with('user')->where('user_id', auth()->user()->id)->first());
+    Route::post('clearances/{student}', [ClearanceController::class, 'store']);
 
-    return $user;
-});
-
-Route::prefix('v1')->group(function () {
-
-    Route::apiResource('students', StudentController::class);
-
-    Route::post('students/upload-profile-picture/{user}', [StudentController::class, 'updateProfilePicture']);
-
-    Route::apiResource('school-personnels', SchoolPersonnelController::class);
-
-    Route::post('school-personnels/upload-profile-picture/{user}', [SchoolPersonnelController::class, 'updateProfilePicture']);
+    Route::post('clearances/bulk', [ClearanceController::class, 'bulkStoreClearance']);
 });

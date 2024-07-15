@@ -16,7 +16,6 @@ class StudentResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'userId' => $this->user_id,
             'lrn' => $this->lrn,
             'studentFirstname' => $this->student_firstname,
             'studentMiddlename' => $this->student_middlename ?? null,
@@ -34,14 +33,7 @@ class StudentResource extends JsonResource
             'studentGuardianName' => $this->student_guardian_name,
             'studentSection' => $this->student_section,
             'studentType' => $this->student_type,
-            'user' =>  [
-                "id" => $this->user->id,
-                "email" => $this->user->email,
-                "emailVerifiedAt" => $this->user->email_verified_at,
-                "role" => $this->user->role->role_name,
-                'roleId' => $this->user->role_id,
-                'profilePicture' => $this->user->profile_picture,
-            ],
+            'clearances' => ClearanceResource::collection($this->whenLoaded('clearance')),
         ];
     }
 }

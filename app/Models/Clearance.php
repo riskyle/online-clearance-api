@@ -25,4 +25,13 @@ class Clearance extends Model
     {
         return $this->belongsTo(Quarter::class);
     }
+
+    public function scopeGetClearances($query)
+    {
+        return $query
+            ->latest()
+            ->with(['student', 'quarter', 'schoolPersonnel'])
+            ->when(auth()->user()->role_id === 3, fn ($query) => $query->where('student_id', Student::findStudent()->lrn))
+            ->paginate();
+    }
 }

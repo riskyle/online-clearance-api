@@ -16,7 +16,10 @@ class StoreSchoolPersonnelRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+
+        $user = auth()->user();
+
+        return auth()->check() && $user->role_id === 1;
     }
 
     /**

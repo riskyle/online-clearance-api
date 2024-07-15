@@ -20,4 +20,20 @@ class Student extends Model
     {
         return $this->hasMany(Clearance::class, 'student_id', 'lrn');
     }
+
+    public function scopeFindStudent($query)
+    {
+        return $query
+            ->when(auth()->user()->role_id === 3, function ($query) {
+                $query->where('user_id', auth()->user()->id);
+            })
+            ->first();
+    }
+
+    public function scopeGetStudent($query, $studentSection = null)
+    {
+        return $query
+            ->when($studentSection ?? false, fn ($query, $studentSection) => $query->where('student_section', $studentSection))
+            ->paginate();
+    }
 }

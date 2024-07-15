@@ -19,7 +19,8 @@ return new class extends Migration
             $table->foreign('quarter_id')->references('id')->on('quarters')->cascadeOnDelete();
             $table->text('description');
             $table->text('task');
-            $table->dateTime('cleared_at');
+            $table->dateTime('cleared_at')->nullable();
+            $table->dateTime('due_date')->nullable();
             $table->timestamps();
         });
     }
