@@ -28,10 +28,12 @@ class SchoolPersonnelResource extends JsonResource
             'spReligion' => $this->sp_religion,
             'spCivilStatus' => $this->sp_civil_status,
             'user' =>  [
-                "id" => $this->user->id,
-                "email" => $this->user->email,
-                "emailVerifiedAt" => $this->user->email_verified_at,
-                "role" => $this->user->role->role_name,
+                'id' => $this->user->id,
+                'email' => $this->user->email,
+                'emailVerifiedAt' => $this->user->email_verified_at,
+                'role' => $this->user->role->role_name,
+                'roleId' => $this->user->role_id,
+                'profilePicture' => $this->user->profile_picture,
             ],
         ];
     }
