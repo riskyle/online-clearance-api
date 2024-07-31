@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Auth;
 
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
@@ -8,16 +8,14 @@ use Illuminate\Validation\Rules;
 use App\Models\Student;
 use Illuminate\Validation\Rule;
 
-class StoreStudentRequest extends FormRequest
+class RegisterRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        $user = auth()->user();
-
-        return auth()->check() && $user->role_id === 1;
+        return !auth()->check();
     }
 
     /**

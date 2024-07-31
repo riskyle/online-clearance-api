@@ -3,13 +3,15 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -59,5 +61,44 @@ class User extends Authenticatable
     public function role()
     {
         return $this->belongsTo(Role::class, 'role_id', 'id');
+    }
+
+    public function scopeGetStudentUsers(Builder $query, $includeClearances = false)
+    {
+        return $query
+            ->where('role_id', 3)
+            ->with(['student' => function ($query) use ($includeClearances) {
+                if ($includeClearances) {
+                    $query->with('clearance');
+                }
+            }]);
+    }
+
+    public function scopeFindStudentUser(Builder $query, $id, $includeClearances = false)
+    {
+        return $query
+            ->where('role_id', 3)
+            ->where('id', $id)
+            ->with(['student' => function ($query) use ($includeClearances) {
+                if ($includeClearances) {
+                    $query->with('clearance');
+                }
+            }])
+            ->first();
+    }
+
+    public function scopeSchoolPersonnels(Builder $query)
+    {
+        return $query
+            ->where('role_id', 1)
+            ->orWhere('role_id', 2);
+    }
+
+    public function scopeFindSchoolPersonnel(Builder $query, $id)
+    {
+        return $query
+            ->whereNot(fn (Builder $query) => $query->where('role_id', 3))
+            ->where('id', $id)
+            ->first();
     }
 }
