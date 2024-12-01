@@ -17,14 +17,15 @@ class ClearanceResource extends JsonResource
         return [
             'id' => $this->id,
             'studentId' => $this->student_id,
-            'student' => $this->student->student_firstname,
             'schoolPersonnelId' => $this->school_personnel_id,
             'schoolPersonnel' => $this->schoolPersonnel->sp_firstname,
             'quarterId' => $this->quarter_id,
             'quarter' => $this->quarter->quarter_name,
             'description' => $this->description,
             'task'  => $this->task,
-            'dueDate'  => $this->due_date,
+            'dueDateAt'  => $this->due_date,
+            'postedDateAt' => $this->created_at,
+            'student' => $this->student,
         ];
     }
 }

@@ -8,6 +8,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Resources\V1\UserResource;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -21,7 +22,7 @@ class AuthenticatedSessionController extends Controller
         $token = $request->user()->createToken('auth-token');
 
         return response()->json([
-            "user" => $request->user(),
+            "user" => new UserResource($request->user()),
             "token" => $token->plainTextToken
         ]);
     }

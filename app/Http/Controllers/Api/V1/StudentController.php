@@ -21,7 +21,7 @@ class StudentController extends Controller
     {
         Gate::authorize('viewAny', $user);
 
-        return new UserCollection($user->getStudentUsers($request->query('includeClearances'))->paginate(3));
+        return new UserCollection($user->getStudentUsers($request->query('includeClearances'))->get());
     }
 
     public function store(StoreStudentRequest $request, User $user)
@@ -33,9 +33,9 @@ class StudentController extends Controller
         ]);
 
         $filteredArray = Arr::except($request->all(), [...$this->excluded(), 'email', 'password']);
-
+    
         $user->student()->create($filteredArray);
-
+        
         return new UserResource($user->findStudentUser($user->id));
     }
 

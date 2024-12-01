@@ -9,22 +9,24 @@ use App\Models\Student;
 use App\Models\SchoolPersonnel;
 use App\Http\Requests\StoreClearanceRequest;
 use App\Http\Resources\V1\ClearanceResource;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Gate;
 
 class ClearanceController extends Controller
 {
 
-    public function index(Clearance $clearance)
+    public function index(Clearance $clearance): JsonResource
     {
         return new ClearanceCollection($clearance->getClearances());
     }
 
-    public function show(Clearance $clearance)
+    public function show(Clearance $clearance): JsonResource
     {
         return new ClearanceResource($clearance);
     }
 
-    public function store(Student $student, StoreClearanceRequest $request, SchoolPersonnel $sp)
+    public function store(Student $student, StoreClearanceRequest $request, SchoolPersonnel $sp): JsonResponse
     {
         $sp = $sp->findSp(auth()->user()->id);
 
@@ -40,7 +42,7 @@ class ClearanceController extends Controller
         return response()->json(['message' => "Successfully added clearance to $student->student_lastname!"]);
     }
 
-    public function bulkStoreClearance(StoreClearanceRequest $request, Student $student, SchoolPersonnel $sp)
+    public function bulkStoreClearance(StoreClearanceRequest $request, Student $student, SchoolPersonnel $sp): JsonResponse
     {
         $students = $student->getStudent(ucwords($request->studentSection));
 
@@ -70,7 +72,7 @@ class ClearanceController extends Controller
         return response()->json(['message' => 'Successfully added clearance!']);
     }
 
-    public function destroy(Clearance $clearance)
+    public function destroy(Clearance $clearance): JsonResponse
     {
         Gate::authorize('delete', $clearance);
 
@@ -79,12 +81,12 @@ class ClearanceController extends Controller
         return response()->json(['message' => 'Successfully deleted clearance!']);
     }
 
-    public function update()
+    public function update(): void
     {
         // I'am gonna think about this method
     }
 
-    public function updateSelectedClearance()
+    public function updateSelectedClearance(): void
     {
         // I'am gonna think about this method
     }

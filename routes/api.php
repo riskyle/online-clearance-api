@@ -8,9 +8,22 @@ use App\Http\Controllers\Api\V1\ProfileController;
 use App\Http\Resources\V1\UserResource;
 use Illuminate\Http\Request;
 
-Route::middleware(['auth:sanctum'])->get('/user', fn (Request $request) =>  new UserResource($request->user()));
+/* 
+#TODO
 
-Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
+TO BE REMEBERED!!!
+
+to register the students on this system
+what will we do is to register them using the google form
+and then store it in the excel and turn it in into CSV file
+then we create a import feature to this system that when uploading a csv file it will upload
+the data into the database 
+
+*/
+
+Route::middleware(['auth:sanctum', 'verified'])->get('/user', fn(Request $request) =>  new UserResource($request->user()));
+
+Route::middleware(['auth:sanctum', 'verified'])->prefix('v1')->group(function () {
 
     Route::apiResource('profiles', ProfileController::class);
 

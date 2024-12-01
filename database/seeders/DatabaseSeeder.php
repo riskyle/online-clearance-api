@@ -2,10 +2,11 @@
 
 namespace Database\Seeders;
 
-use App\Models\Quarter;
-use App\Models\Role;
+use App\Models\Clearance;
 use App\Models\SchoolPersonnel;
+use App\Models\Student;
 use App\Models\User;
+use Database\Factories\UserFactory;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -18,43 +19,22 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        // auto generate data in role table
-        Role::create([
-            'id' => 3,
-            'role_name' => 'Student',
-        ]);
-        Role::create([
-            'id' => 2,
-            'role_name' => 'Admin',
-        ]);
-        Role::create([
-            'id' => 1,
-            'role_name' => 'Super Admin',
+        $this->call([
+            RoleSeeder::class,
+            QuarterSeeder::class
         ]);
 
-        // auto generate data in quarter table
-        Quarter::create([
-            'id' => 1,
-            'quarter_name' => "1st Quarter"
-        ]);
-        Quarter::create([
-            'id' => 2,
-            'quarter_name' => "2nd Quarter"
-        ]);
-        Quarter::create([
-            'id' => 3,
-            'quarter_name' => "3rd Quarter"
-        ]);
-        Quarter::create([
-            'id' => 4,
-            'quarter_name' => "4th Quarter"
-        ]);
+        SchoolPersonnel::factory(50)->create();
+
+        Student::factory(100)
+            ->has(Clearance::factory(5))
+            ->create();
 
         $admin = User::factory()->create([
             'email' => 'admin@admin.com',
             'role_id' => 2,
         ]);
-       
+
         $admin->schoolPersonnel()->create([
             'sp_firstname' => 'Christian Kyle',
             'sp_middlename' => '',
@@ -72,7 +52,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'super@admin.com',
             'role_id' => 1,
         ]);
-        
+
         $superadmin->schoolPersonnel()->create([
             'sp_firstname' => 'Jee Ann',
             'sp_middlename' => 'Macaputol',

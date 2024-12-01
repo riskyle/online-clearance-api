@@ -49,16 +49,16 @@ return new class extends Migration
         Schema::create('school_personnels', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->string("sp_firstname");
-            $table->string("sp_middlename")->nullable();
-            $table->string("sp_lastname");
-            $table->string("sp_mobile_number")->unique()->nullable();
-            $table->string("sp_address")->nullable();
-            $table->string("sp_sex");
-            $table->date("sp_birthdate")->nullable();
-            $table->string("sp_age")->nullable();
-            $table->string("sp_religion")->nullable();
-            $table->string("sp_civil_status")->nullable();
+            $table->string('sp_firstname');
+            $table->string('sp_middlename')->nullable();
+            $table->string('sp_lastname');
+            $table->string('sp_mobile_number')->unique()->nullable();
+            $table->string('sp_address')->nullable();
+            $table->string('sp_sex');
+            $table->date('sp_birthdate')->nullable();
+            $table->string('sp_age')->nullable();
+            $table->string('sp_religion')->nullable();
+            $table->string('sp_civil_status')->nullable();
             $table->timestamps();
         });
 
